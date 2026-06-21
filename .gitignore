@@ -1,0 +1,33 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Databases
+*.db
+agent_tick/verdicts.db
+
+# ADK and system artifacts
+.adk/
+agent_tick/.adk/
+reviews/
+agent_tick/reviews/
+
+# Environments and Secrets
+.env
+.venv
+env/
+venv/
+ENV/
+*.key
+*.pem
+
+# IDEs
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
