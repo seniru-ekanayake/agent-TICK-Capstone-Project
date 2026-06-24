@@ -1,0 +1,24 @@
+# Video Demo Script: Agent TICK
+
+**Target Duration**: 4:30 – 5:00 minutes (Strictly under the 5-minute hackathon limit)  
+**Tone**: Confident, professional, clear, and cybersecurity-focused.
+
+---
+
+## Script Breakdown
+
+| Timing | Visual / Action on Screen | Speaker Narration |
+| :--- | :--- | :--- |
+| **0:00 - 0:45** | **Slide 1: Title Slide & Problem**<br>Display title: *Agent TICK: Guardrails for the Agentic Era*.<br>Overlay: A snippet of the Mandiant M-Trends report highlighting software supply chain risks and AI pipeline compromises. | "Hi everyone! Welcome to the walkthrough of Agent TICK, a security meta-agent designed to act as the guardrails for the agentic era.<br><br>As AI agents move from chat interfaces to executing actions, they rely on tools and Model Context Protocol, or MCP, servers. However, this creates a major vulnerability. The latest Mandiant M-Trends report shows that software supply chains are prime vectors for compromise. In the AI world, this means attackers can poison public tool registries, sneaking malicious instructions directly into tool metadata or code scripts." |
+| **0:45 - 1:30** | **Slide 2: Solution & Architecture**<br>Display the Multi-Agent Flow Diagram (Coordinator agent routing to Static and Dynamic sub-agents). | "To solve this, we built Agent TICK using the Google Agent Development Kit (ADK).<br><br>Agent TICK is a security gatekeeper that audits tools before they enter your production environment. Under the hood, it uses an ADK multi-agent structure. The coordinator agent, `agent_tick`, accepts the tool description and delegates tasks. The `static_analyzer` sub-agent scans metadata, JSON schemas, and entropy, while the `dynamic_analyzer` runs behavioral model simulations and AST sandbox verifications to intercept suspicious activities." |
+| **1:30 - 2:30** | **Screen Recording: ADK Web UI**<br>Show the browser running the ADK Web UI. Select `agent_tick` from the top-left dropdown.<br><br>**Action**: Paste **Use Case 1** (Safe Math Tool) into the chat box and hit send. | "Let's see this in action. We are using the local Google ADK Web portal UI.<br><br>Our first scenario is a standard, safe math tool. We ask Agent TICK to verify it. In the background, the ADK runner initializes our coordinator agent.<br><br>The static analyzer looks at the description and parameter schema, and because there are no instruction anomalies or suspicious signatures, the agent quickly returns a clean 'PASS' verdict. This shows how fast and clean standard tools navigate the gateway." |
+| **2:30 - 4:15** | **Screen Recording: ADK Web UI**<br>Open a new session.<br><br>**Action**: Copy and paste the XOR Obfuscated Python Script (**Use Case 2**) into the chat box. Hit send and wait for the agent's output. | "Now, let's look at an extremely tricky attack designed to evade standard signature checkers. We are auditing a tool that contains a python code skill.<br><br>The code imports benign modules and uses list integer index lookups (`[__builtins__.__dict__['eval']][0]`) to execute an obfuscated shell payload encoded via an XOR cipher. No blocked words like 'exec' or 'eval' are directly visible to basic syntax checkers.<br><br>Let's submit it... and look at the response! Agent TICK successfully flagged the tool. Within the ADK reasoning loop, the static analyzer evaluated the stack reference, resolved the stack frame, mentally decrypted the XOR cipher in its context window, and exposed the exact payload: `open('hacked.txt', 'w').write('pwned')`. It returned a 'FLAG-FOR-REVIEW' verdict with a complete, plain-language security explanation. Most standard code scanners would have missed this entirely!" |
+| **4:15 - 5:00** | **Slide 3: Roadmap & Outro**<br>Display the deployment URL and the architectural roadmap showing the transition to a fully managed Vertex AI Engine. | "Agent TICK is fully containerized and currently deployed on Google Cloud Run. By leveraging Google ADK, we've demonstrated how to combine static checks with semantic reasoning to create a robust security firewall.<br><br>Our production roadmap includes transitioning these playbooks to a fully managed Vertex AI Engine, protecting enterprise pipelines at scale.<br><br>Check out our GitHub repository for the full source code and setup instructions. Thanks for watching!" |
+
+---
+
+## Presenter Preparation Tips:
+
+1. **Self-Test Before Recording**: Ensure you run `python agent_tick/evaluate_adversarial.py` in the background first so the local database holds some verdicts, and keep your Google Cloud Application Default Credentials active for the live Vertex AI simulations.
+2. **Pacing**: Speak at a steady, conversational pace. Do not rush, but avoid long pauses. You can edit out any API request latency gaps in post-production to keep the flow brisk.
+3. **Resolution**: Keep your browser window scaled to a readable size (1080p, 125% zoom is best for code and portal text legibility in video).
