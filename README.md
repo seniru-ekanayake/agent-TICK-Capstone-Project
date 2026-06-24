@@ -45,6 +45,8 @@ This project implements three key concepts covered in the Kaggle AI Agents Inten
 
 ## 4. Architecture
 
+![Agent TICK Architecture](agent_tick_architecture.png)
+
 Agent TICK is designed as a stateless, containerized REST API microservice utilizing a multi-agent hierarchy orchestrated by the ADK.
 
 ### Multi-Agent Hierarchy

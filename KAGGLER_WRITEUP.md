@@ -33,6 +33,8 @@ If an agent imports this tool, the planner parses the description, falls victim 
 
 Agent TICK (Tool Integrity & Control-plane Keeper) is a security meta-agent that sits between tool registries and agent runtimes. Rather than using rigid regular expressions, it uses a multi-agent hierarchy built on the **Google Agent Development Kit (ADK)** to audit tools.
 
+![Agent TICK Architecture](agent_tick_architecture.png)
+
 ```
                   +-----------------------------------+
                   |      FastAPI Tenant Gateway       |
