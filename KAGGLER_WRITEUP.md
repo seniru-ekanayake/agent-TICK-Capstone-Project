@@ -54,9 +54,35 @@ This architectural pattern of separating concerns into localized agents aligns w
 ## 4. How Everything Works: The Dual-Phase Auditing Pipeline
 
 Agent TICK's security gateway consists of a **dual-phase static and behavioral validation pipeline**:
-
-![Agent TICK Architecture](agent_tick_architecture.png)
-
+```
+                  +-----------------------------------+
+                  |      FastAPI Tenant Gateway       |
+                  +-----------------------------------+
+                                    |
+                                    v
+                  +-----------------------------------+
+                  |        ADK Runner Engine          |
+                  +-----------------------------------+
+                                    |
+                  +-----------------+-----------------+
+                  |                                   |
+                  v                                   v
+    +---------------------------+       +---------------------------+
+    |   Static Analyzer Agent   |       |  Dynamic Analyzer Agent   |
+    +---------------------------+       +---------------------------+
+    | - Unicode Normalization   |       | - AST Sandbox Validator   |
+    | - Shannon Entropy Scan    |       | - Live Model Simulation   |
+    | - Signature Db Lookup     |       | - Differential Param Diff |
+    | - Nested Schema Parser    |       | - Exfiltration Intercept  |
+    +---------------------------+       +---------------------------+
+                  |                                   |
+                  +-----------------+-----------------+
+                                    |
+                                    v
+                  +-----------------------------------+
+                  |        SQLite verdicts.db         |
+                  +-----------------------------------+
+```
 ### Phase 1: Static Analysis
 The static analyzer serves as a low-latency gateway that filters out known threats and structural anomalies:
 1. **Homoglyph Normalization**: Attackers often replace Latin characters with Cyrillic lookalikes (e.g., using Cyrillic 'і' in "instructions") to bypass keyword filters. The static analyzer normalizes Unicode confusable characters to standard ASCII before running checks.
