@@ -12,7 +12,7 @@
 
 As artificial intelligence transitions from conversational Large Language Models (LLMs) to autonomous, active agents equipped with tools and APIs, the security perimeter of modern software systems is being fundamentally redrawn. Autonomous agents execute Model Context Protocol (MCP) servers and third-party code skills to interface with databases, modify local file systems, and invoke network APIs. However, this active capability introduces a new class of cybersecurity threats: indirect prompt injections, tool description poisoning, and sandbox-escaping runtime execution.
 
-To address these vulnerabilities, we present **Agent TICK** (Tool Integrity & Control-plane Keeper)—a production-grade security meta-agent built using the **Google Agent Development Kit (ADK)** and deployed on **Google Cloud Platform (GCP) Cloud Run**. Agent TICK sits between untrusted tool registries and enterprise agent runtimes, orchestrating a multi-agent hierarchy to perform static signature analysis, recursive syntax tree verification, and live model-calling simulations (Differential Analysis). By implementing a tiered safety firewall, Agent TICK achieves an **F1 Score of 1.0000** against advanced red-team exploits (including obfuscated execution loops that bypass traditional application security scanners) while reducing runtime sandboxing compute overhead by up to **97%**.
+To address these vulnerabilities, we present **Agent TICK** (Tool Integrity & Control-plane Keeper)—a production-grade security meta-agent built using the **Google Agent Development Kit (ADK)** and deployed on **Google Cloud Platform (GCP) Cloud Run**. Agent TICK sits between untrusted tool registries and enterprise agent runtimes, orchestrating a multi-agent hierarchy to perform static signature analysis, recursive syntax tree verification, and live model-calling simulations (Differential Analysis). Built directly upon the security and evaluation paradigms of the **Kaggle 5-Day AI Agents Intensive Course**, Agent TICK achieves a perfect **F1 Score of 1.0000** against advanced red-team exploits (including obfuscated execution loops that bypass traditional application security scanners) while reducing runtime sandboxing compute overhead by up to **97%**.
 
 ---
 
@@ -27,7 +27,18 @@ If an agent imports this tool, the planner reads the poisoned description, falls
 
 ---
 
-## 2. Why a Multi-Agent Hierarchy? (Cognitive Division of Labor)
+## 2. Theoretical Underpinnings & Kaggle Course Alignment
+
+Agent TICK's design maps directly to the core pillars of the Google/Kaggle AI Agents curriculum:
+
+* **Day 2: Agent Tools & Interoperability (MCP standard)**: Day 2 explored the Model Context Protocol (MCP) as a unified standard for tool communication. Agent TICK acts as an auditing firewall for MCP servers, intercepting the server's initialization manifest to parse connection settings (stdio or SSE pathways) before the host opens the execution socket.
+* **Day 3: Agent Skills & Custom Executions**: Custom code skills require execution environments. Agent TICK secures the Day 3 paradigm by implementing a restricted Abstract Syntax Tree (AST) validator that inspects user-submitted Python code blocks before execution.
+* **Day 4: Safety, Red-Teaming, & Continuous Evaluation**: Day 4 emphasized that security cannot be patched with ad-hoc prompt guidelines; it requires a structured evaluation framework. We built a continuous adversarial evaluation suite (`evaluate_adversarial.py`) running a golden dataset of 15 test cases (10 red-team exploits and 5 clean controls) to measure precision, recall, and F1 metrics under live Vertex AI execution.
+* **Day 5: Spec-Driven Development (SDD)**: Aligning with Day 5's production engineering methodologies, we authored declarative agent specifications (`root_agent.yaml`, `static_analyzer.yaml`, `dynamic_analyzer.yaml`) and used the ADK's native `Runner` to orchestrate them, eliminating the need for complex, manual procedural loops.
+
+---
+
+## 3. Why a Multi-Agent Hierarchy? (Cognitive Division of Labor)
 
 A common architectural anti-pattern in security pipelines is routing all validation tasks to a single, monolithic LLM session. In AGI engineering, this approach degrades safety guarantees due to **prompt distraction** and context-window bloat. If one model instance is responsible for analyzing code, performing math validation, scanning schemas, and running dynamic simulations, its reasoning accuracy drops under the heavy cognitive load.
 
@@ -40,7 +51,7 @@ This architectural pattern of separating concerns into localized agents aligns w
 
 ---
 
-## 3. How Everything Works: The Dual-Phase Auditing Pipeline
+## 4. How Everything Works: The Dual-Phase Auditing Pipeline
 
 Agent TICK's security gateway consists of a **dual-phase static and behavioral validation pipeline**:
 
@@ -65,7 +76,7 @@ If the tool passes the static filters, it is forwarded to the dynamic analyzer f
 
 ---
 
-## 4. Technical Highlights & Code Implementation
+## 5. Technical Highlights & Code Implementation
 
 To prove the technical depth of the safety engine, below are the core code implementations of the AST validator and the cryptographic signature synchronization system.
 
@@ -100,31 +111,12 @@ if not hmac.compare_digest(expected_sig, signature):
 
 ---
 
-## 5. Tools, Skills, and MCP Integrations Used
-
-Agent TICK is built on the **Google Agent Development Kit (ADK)**, utilizing its declarative agent YAML configuration and native orchestration control loop. 
-
-### Core ADK Tools & Skills Implemented:
-* **`lookup_known_threats`**: Connects to the SQLite database to query threat signatures.
-* **`compute_description_entropy`**: Calculates character distribution values to identify obfuscated strings.
-* **`run_sandbox_test`**: Integrates an AST parsing routine that checks syntax nodes recursively.
-* **`simulate_agent_interaction`**: Routes prompt requests to Vertex AI Gemini and monitors tool argument generation.
-* **`diff_declared_vs_observed`**: Performs differential matching on schemas and simulated parameters.
-* **`store_verdict`**: Logs final evaluation verdicts (`pass`, `fail`, `flag-for-review`) to the SQLite verdicts database.
-
-### Model Context Protocol (MCP) Integrations:
-Agent TICK parses MCP server manifests to validate connection schemas. We developed [crawl_registry.py](file:///c:/Kaggle%20Capstone/agent_tick/crawl_registry.py) to simulate crawling public registries like `mcp.so`. It pulls capability manifests, passes connection settings through the validation pipeline, maps behavioral fingerprints, and publishes findings to an automated Markdown dashboard.
-
-Standard static analysis engines fail to check connection settings because MCP servers interact via stdio (standard input/output) pathways or SSE (Server-Sent Events) HTTP routes. These dynamic, stateful communication streams are invisible to static code scanners. Agent TICK bridges this gap by intercepting the manifest and evaluating the connection arguments before the host opens the socket.
-
----
-
 ## 6. The Engineering Journey & Self-Audit Remediation
 
 Applying first-principles software engineering, we audited our meta-agent configuration using specialized review sub-agents. This self-critique revealed two critical architectural issues, which we resolved:
 
 ### ARC-01: Orchestration Bypass Resolution
-* **The Issue**: Early iterations of [api.py](file:///c:/Kaggle%20Capstone/agent_tick/api.py) bypassed the ADK runner and directly executed python functions, making the declarative YAML configurations redundant.
+* **The Issue**: Early iterations of [api.py](file:///c:/Kaggle%20Capstone/api.py) bypassed the ADK runner and directly executed python functions, making the declarative YAML configurations redundant.
 * **The Refactoring**: Rebuilt the API backend to load configurations programmatically via `config_agent_utils.from_config()` and execute evaluations using the ADK `Runner` and `InMemorySessionService`.
 
 ### ARC-02: Native Parameter Design Refactoring
@@ -133,18 +125,7 @@ Applying first-principles software engineering, we audited our meta-agent config
 
 ---
 
-## 7. Security Impacts in the AGI Era
-
-In the path toward AGI, AI systems will manage critical infrastructure, trade on markets, and access personal data. Traditional security gates cannot secure these systems because the vulnerabilities are semantic, dynamic, and non-deterministic.
-
-Agent TICK secures this transition by:
-1. **Verifying supply chains**: Automatically crawling and grading public MCP servers before integration.
-2. **Defeating obfuscated RCE**: Using semantic de-obfuscation to decrypt and expose XOR, base64, or frame reflection exploits that traditional scanners miss.
-3. **Enforcing strict behavioral boundaries**: Intercepting exfiltration attempts in a simulated environment before they hit production systems.
-
----
-
-## 8. Concrete ROI Metrics & Financial Projections
+## 7. Concrete ROI Metrics & Financial Projections
 
 For an enterprise deploying agentic workflows, Agent TICK provides direct, measurable Return on Investment (ROI) across three primary categories: **infrastructure cost reduction**, **API token optimization**, and **risk mitigation**.
 
@@ -159,7 +140,7 @@ With a deployment and compute cost of under $200,000 annually (including Vertex 
 
 ---
 
-## 9. How to Test on Your Own
+## 8. How to Test on Your Own
 
 ### 1. Setup
 ```bash
@@ -188,7 +169,7 @@ python agent_tick/test_api.py
 
 ---
 
-## 10. Future Improvements & Production Roadmap
+## 9. Future Improvements & Production Roadmap
 
 To scale Agent TICK to support hundreds of concurrent workloads, we plan to transition the engine from a code-first ADK application to a **fully Vertex AI Engine managed agent**:
 
